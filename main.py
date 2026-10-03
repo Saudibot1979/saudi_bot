@@ -3,12 +3,19 @@ from flask import Flask
 app = Flask(__name__)
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
+
 def send_tg(msg):
     try:
         url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
         requests.post(url, json={"chat_id": CHAT_ID, "text": msg, "parse_mode": "Markdown"})
     except: pass
-HALAL_38 = ["2222","2010","2020","2030","2050","2060","2080","2100","2110","2150","2160","2170","2180","2190","2200","2210","2230","2240","2250","2260","2280","2300","2310","2320","2350","2360","2380","4001","4002","4003","4005","4006","4011","4013","4020","4030","4040","4050"]
+
+NAMES = {
+"2222":"أرامكو","2010":"سابك","2020":"سابك للمغذيات","2030":"المصافي","2050":"سافكو","2060":"التصنيع","2080":"غازكو","2100":"فواز الحكير","2110":"الكهرباء","2150":"البابطين","2160":"اميانتيت","2170":"اللجين","2180":"فيبكو","2190":"سيسكو","2200":"أنابيب","2210":"نماء","2230":"الكيميائية","2240":"الزامل","2250":"المجموعة","2260":"الصحراء","2280":"المراعي","2300":"صناعة الورق","2310":"سبكيم","2320":"البابطين","2350":"كيان","2360":"الحكير","2380":"بترو رابغ","4001":"العثيم","4002":"المواساة","4003":"إكسترا","4005":"رعاية","4006":"أسواق المزرعة","4011":"دور","4013":"سليمان الحبيب","4020":"العقارية","4030":"البحري","4040":"سيرا","4050":"سيارات"
+}
+
+HALAL_38 = list(NAMES.keys())
+
 def check_stock(symbol):
     try:
         df = yf.download(f"{symbol}.SR", period="3mo", progress=False)
@@ -22,6 +29,7 @@ def check_stock(symbol):
             return {"symbol":symbol,"price":price_now}
     except: return None
     return None
+
 @app.route("/")
 def run():
     found=[]
@@ -33,9 +41,11 @@ def run():
         return "No signals"
     msg="📈 *توصيات اليوم - 38 سهم نقي حلال*\n\n"
     for x in found[:10]:
-        msg+=f"🟢 {x['symbol']} - {x['price']:.2f}\n"
+        name = NAMES.get(x['symbol'], x['symbol'])
+        msg+=f"🟢 {name} ({x['symbol']}) - {x['price']:.2f} ر.س\n"
     msg+="\n⚠️ ليست نصيحة استثمارية"
     send_tg(msg)
     return msg
+
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=8080)
