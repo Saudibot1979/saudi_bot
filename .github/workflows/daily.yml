@@ -1,18 +1,18 @@
-name: daily bot
+name: daily
 on:
-  schedule:
-    - cron: '0 7 * * 1-5'
   workflow_dispatch:
+  schedule:
+    - cron: '0 5 * * *'
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-      - run: pip install -r requirements.txt
-      - run: python main.py
+          python-version: '3.11'
+      - run: pip install requests
+      - run: python saudi_bot/main.py
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
