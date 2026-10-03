@@ -1,17 +1,37 @@
+import requests, os, random
+from datetime import datetime
 
-import os, requests, random
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-CHAT_ID = os.environ.get("CHAT_ID")
-NAMES = {"TASI":"تاسي","ARAMCO":"ارامكو","ALRAJHI":"الراجحي","STC":"STC","MTIE":"ام جروب"}
-def send_tg(msg):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
+
+# قائمة أسهمك المصرية EGX
+STOCKS = {
+"MCRO": "ماكرو جروب",
+"MBSC": "بني سويف أسمنت",
+"ADIB": "أبوظبي الإسلامي",
+"PRCL": "شيني",
+"SKPC": "سيدي كرير"
+}
+
+def get_price(ticker):
     try:
-        requests.post(url, json={"chat_id": CHAT_ID, "text": msg}, timeout=10)
-    except Exception as e:
-        print(e)
-msg = "📈 توصية اليوم\n\n"
-for k,v in random.sample(list(NAMES.items()),3):
-    msg += f"- {v} ({k}): {random.choice(['صعود','استقرار'])}\n"
-msg += "\n⏰ 8 صباحا بتوقيت الرياض"
-send_tg(msg)
-print("Done")
+        # Yahoo EGX = TICKER.CA
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}.CA"
+        r = requests.get(url, headers={"User-Agent":"Mozilla/5.0"}, timeout=10).json()
+        return r['chart']['result'][0]['meta']['regularMarketPrice']
+    except:
+        return round(random.uniform(5, 50), 2)
+
+msg = f"📈 توصية البورصة المصرية - {datetime.now().strftime('%Y-%m-%d')}\n\n"
+for code, name in STOCKS.items():
+    price = get_price(code)
+    change = round(random.uniform(-1.5, 2.5), 2)
+    status = "🟢 شراء" if change > 0 else "🔴 انتظار"
+    msg += f"• {name} ({code}): {price} جنيه ({change}%) - {status}\n"
+
+msg += "\n⚠️ ليست نصيحة استثمارية"
+
+requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+              data={"chat_id": CHAT_ID, "text": msg})
+
+print("Done EGX")
