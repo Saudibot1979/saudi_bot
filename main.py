@@ -4,7 +4,6 @@ from datetime import datetime
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-# قائمة أسهمك المصرية EGX
 STOCKS = {
 "MCRO": "ماكرو جروب",
 "MBSC": "بني سويف أسمنت",
@@ -15,7 +14,6 @@ STOCKS = {
 
 def get_price(ticker):
     try:
-        # Yahoo EGX = TICKER.CA
         url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}.CA"
         r = requests.get(url, headers={"User-Agent":"Mozilla/5.0"}, timeout=10).json()
         return r['chart']['result'][0]['meta']['regularMarketPrice']
@@ -31,7 +29,5 @@ for code, name in STOCKS.items():
 
 msg += "\n⚠️ ليست نصيحة استثمارية"
 
-requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-              data={"chat_id": CHAT_ID, "text": msg})
-
+requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": msg})
 print("Done EGX")
